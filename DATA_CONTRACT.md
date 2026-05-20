@@ -9,8 +9,11 @@ These files contain your personal data, customizations, and work product. Update
 | File | Purpose |
 |------|---------|
 | `cv.md` | Your CV in markdown |
+| `cv-{name}.md` | Named-candidate CV (multi-profile) |
 | `config/profile.yml` | Your identity, targets, comp range |
+| `config/profile-{name}.yml` | Named-candidate profile config (multi-profile) |
 | `modes/_profile.md` | Your archetypes, narrative, negotiation scripts |
+| `modes/_profile-{name}.md` | Named-candidate archetypes and framing (multi-profile) |
 | `article-digest.md` | Your proof points from portfolio |
 | `interview-prep/story-bank.md` | Your accumulated STAR+R stories |
 | `portals.yml` | Your customized company list |
@@ -19,8 +22,9 @@ These files contain your personal data, customizations, and work product. Update
 | `data/scan-history.tsv` | Your scan history |
 | `data/follow-ups.md` | Your follow-up history |
 | `writing-samples/*` | Your personal writing samples for style calibration (except `writing-samples/README.md`, which is system-owned documentation delivered by updates) |
-| `reports/*` | Your evaluation reports |
-| `output/*` | Your generated PDFs |
+| `profiles/{name}/reports/*` | Your evaluation reports |
+| `profiles/{name}/cv/*` | Your tailored CV HTML files |
+| `profiles/{name}/output/*` | Your generated PDFs and report HTMLs |
 | `jds/*` | Your saved job descriptions |
 
 ## System Layer (safe to auto-update)

@@ -14,6 +14,7 @@ There are two layers. Read `DATA_CONTRACT.md` for the full list.
 
 **User Layer (NEVER auto-updated, personalization goes HERE):**
 - `cv.md`, `config/profile.yml`, `modes/_profile.md`, `article-digest.md`, `portals.yml`
+- `cv-{name}.md`, `config/profile-{name}.yml`, `modes/_profile-{name}.md` (multi-profile files)
 - `data/*`, `reports/*`, `output/*`, `interview-prep/*`
 
 **System Layer (auto-updatable, DON'T put user data here):**
@@ -51,6 +52,13 @@ AI-powered, CLI-agnostic job search automation: pipeline tracking, offer evaluat
 | File | Function |
 |------|----------|
 | `data/applications.md` | Application tracker |
+| `cv-{name}.md` | Named-candidate CV source (multi-profile) |
+| `config/profile-{name}.yml` | Named-candidate profile config (multi-profile) |
+| `modes/_profile-{name}.md` | Named-candidate archetypes and framing (multi-profile) |
+| `profiles/{name}/cv/` | Tailored CV HTML sources for this candidate |
+| `profiles/{name}/output/` | Generated PDFs and rendered HTML for this candidate |
+| `profiles/{name}/reports/` | Evaluation report markdown files for this candidate |
+| `.mcp.json` | MCP server declarations (e.g. iMessage channel) |
 | `data/pipeline.md` | Inbox of pending URLs |
 | `data/scan-history.tsv` | Scanner dedup history |
 | `portals.yml` | Query and company config |
@@ -223,6 +231,40 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 - `article-digest.md` has detailed proof points (optional)
 - **NEVER hardcode metrics** -- read them from these files at evaluation time
 
+### Multi-Profile Support
+
+career-ops supports multiple candidates in a single project directory. Each additional profile follows a named-file convention:
+
+**Folder structure:**
+
+```
+profiles/
+├── {firstname-lastname}/
+│   ├── cv/          ← tailored CV HTML sources (one per role applied to)
+│   ├── output/      ← generated PDFs + report HTML/PDF
+│   └── reports/     ← evaluation report .md files
+└── ...
+```
+
+| File / Folder | Example | Purpose |
+|---------------|---------|---------|
+| `cv-{name}.md` | `cv-gaita.md` | Canonical CV source in markdown |
+| `config/profile-{name}.yml` | `config/profile-gaita.yml` | Identity, targets, comp range |
+| `modes/_profile-{name}.md` | `modes/_profile-gaita.md` | Archetypes, framing, negotiation scripts |
+| `profiles/{name}/cv/` | `profiles/gaita-mompoint/cv/` | Tailored CV HTML sources |
+| `profiles/{name}/output/` | `profiles/gaita-mompoint/output/` | CV PDFs, report PDFs, report HTML |
+| `profiles/{name}/reports/` | `profiles/gaita-mompoint/reports/` | Evaluation report .md files |
+
+**To activate a named profile:** The user says "use [name]'s profile" (e.g. "use Gaita's profile"). Read `cv-{name}.md`, `config/profile-{name}.yml`, and `modes/_profile-{name}.md` instead of the defaults for the rest of the session.
+
+**To create a named profile from a PDF or LinkedIn:**
+1. Read the source (PDF path or pasted text) and write `cv-{name}.md`
+2. Copy `config/profile.example.yml` → `config/profile-{name}.yml` and populate from the CV
+3. Copy `modes/_profile.template.md` → `modes/_profile-{name}.md` and populate archetypes from the CV
+4. Create `profiles/{firstname-lastname}/{cv,output,reports}/` directories
+
+**Reports and tracker:** Report numbering stays global (sequential across all candidates). Reports live in `profiles/{name}/reports/`. Tracker links in `applications.md` reference `profiles/{name}/reports/{file}.md`. Include `**Candidate:**` in the report header when not the default profile.
+
 ---
 
 ## Ethical Use -- CRITICAL
@@ -279,7 +321,8 @@ When spawning headless workers for batch processing, use the appropriate command
 
 - Node.js (mjs modules), Playwright (PDF + scraping), YAML (config), HTML/CSS (template), Markdown (data), Canva MCP (optional visual CV)
 - Scripts in `.mjs`, configuration in YAML
-- Output in `output/` (gitignored), Reports in `reports/`
+- All candidate output in `profiles/{firstname-lastname}/{cv,output,reports}/` (gitignored)
+- Global `reports/` and `output/` at project root are legacy — use `profiles/` for all new work
 - JDs in `jds/` (referenced as `local:jds/{file}` in pipeline.md)
 - Batch in `batch/` (gitignored except scripts and prompt)
 - Report numbering: sequential 3-digit zero-padded, max existing + 1
@@ -316,6 +359,28 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 5. Health check: `node verify-pipeline.mjs`
 6. Normalize statuses: `node normalize-statuses.mjs`
 7. Dedup: `node dedup-tracker.mjs`
+
+### iMessage Integration (optional)
+
+career-ops can send CVs, reports, and messages via iMessage using the `imessage` MCP plugin. When active, a `reply` tool is available for outbound sends.
+
+**Setup:**
+1. Plugin installed at `~/.claude/plugins/cache/claude-plugins-official/imessage/0.1.0/`
+2. `.mcp.json` in the project root declares the MCP server (runs via `bun`)
+3. Restart Claude Code to activate — the `reply` tool appears in the session
+
+**Sending a file:**
+- If the `reply` MCP tool is available: resolve the chat GUID from `~/Library/Messages/chat.db` and use `reply` with the file path
+- If the MCP server is not yet active (same session as setup): use `osascript` directly with the phone number — no GUID needed:
+  ```bash
+  osascript -e 'tell application "Messages" to send POSIX file "/path/to/file.pdf" to buddy "+1XXXXXXXXXX" of 1st service whose service type = iMessage'
+  ```
+
+**Access control:** Managed via `~/.claude/channels/imessage/access.json`. Self-chat (texting yourself) always bypasses the gate. For other contacts, use `/imessage:access allow +1XXXXXXXXXX` after restart.
+
+**Phone number format:** Always use `+{country code}{number}` — e.g. `+14088218024`.
+
+**NEVER send an application or CV without the user explicitly naming the recipient and confirming the file.**
 
 ### Canonical States (applications.md)
 

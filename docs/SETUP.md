@@ -5,6 +5,7 @@
 - [Claude Code](https://claude.ai/code) installed and configured
 - Node.js 18+ (for PDF generation and utility scripts)
 - (Optional) Go 1.21+ (for the dashboard TUI)
+- (Optional) bun 1.0+ (for iMessage integration) — install via `curl -fsSL https://bun.sh/install | bash`
 
 ## Quick Start (5 steps)
 
@@ -63,6 +64,51 @@ Then paste a job offer URL or description. Career-ops will automatically evaluat
 | Batch evaluate | `/career-ops batch` |
 | Check tracker status | `/career-ops tracker` |
 | Fill application form | `/career-ops apply` |
+
+## Multi-Profile Setup (optional)
+
+To manage multiple candidates in one project (e.g. helping a colleague):
+
+```bash
+# Create named files for the new candidate
+cp config/profile.example.yml config/profile-{name}.yml
+cp modes/_profile.template.md modes/_profile-{name}.md
+# Add their CV as cv-{name}.md (paste text or provide a PDF path)
+```
+
+Then tell the agent: **"use {name}'s profile"** — it will read the named files instead of the defaults for the session. All output is saved under `profiles/{firstname-lastname}/`:
+
+```
+profiles/
+└── firstname-lastname/
+    ├── cv/        ← tailored CV HTML files
+    ├── output/    ← generated PDFs and report HTMLs
+    └── reports/   ← evaluation report markdown files
+```
+
+## iMessage Integration (optional)
+
+Send CVs and reports directly via iMessage from within a session.
+
+**One-time setup:**
+
+```bash
+# 1. Install bun (if not already installed)
+curl -fsSL https://bun.sh/install | bash
+
+# 2. Install the plugin (creates ~/.claude/plugins/ registry entry)
+/plugin install imessage@claude-plugins-official
+
+# 3. .mcp.json is created automatically — restart Claude Code to activate
+```
+
+After restart, the `reply` MCP tool is available. To allow a contact:
+
+```
+/imessage:access allow +1XXXXXXXXXX
+```
+
+Self-chat (texting yourself) works immediately with no configuration.
 
 ## Verify Setup
 

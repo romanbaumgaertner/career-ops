@@ -68,6 +68,30 @@ Career-ops can integrate with external systems via Claude Code hooks. Example ho
 
 Save hooks in `.claude/settings.json`.
 
+## Multi-Profile Setup
+
+To run career-ops for multiple candidates from the same project directory, use the named-file convention:
+
+| File | Example |
+|------|---------|
+| `cv-{name}.md` | `cv-gaita.md` |
+| `config/profile-{name}.yml` | `config/profile-gaita.yml` |
+| `modes/_profile-{name}.md` | `modes/_profile-gaita.md` |
+| `profiles/{firstname-lastname}/` | `profiles/gaita-mompoint/` |
+
+**Creating a profile from a PDF resume:**
+Tell the agent: *"create a profile for [name] from this PDF: /path/to/resume.pdf"*. It will generate all three files populated from the resume content.
+
+**Activating a named profile:**
+Tell the agent: *"use [name]'s profile"* at the start of a session. It reads the named files instead of defaults for the entire session.
+
+**What each file contains:**
+- `cv-{name}.md` — full CV in markdown, same structure as `cv.md`
+- `config/profile-{name}.yml` — identity, target roles, archetypes, comp targets, location
+- `modes/_profile-{name}.md` — adaptive framing per archetype, negotiation scripts, location policy, writing style
+
+Reports stay globally numbered. All output files (CV HTML/PDF, report PDFs) go into `profiles/{firstname-lastname}/{cv,output,reports}/`.
+
 ## States (templates/states.yml)
 
 The canonical states rarely need changing. If you add new states, update:
